@@ -8,7 +8,7 @@ def send(msg):
     requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
 
 def check():
-    API_KEY = "TA_CLE"
+    API_KEY = "d4655181e5deb006f332a39536f4b0aa"
 
     target_url = "https://www.vinted.fr/api/v2/catalog/items?search_text=nike&order=newest_first"
 
