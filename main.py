@@ -6,7 +6,7 @@ CHAT_ID = "8767334604"
 
 seen = set()
 
-search_text=nike
+search = "nike"
 
 def send(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
