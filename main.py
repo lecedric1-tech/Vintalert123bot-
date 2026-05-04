@@ -21,30 +21,32 @@ def check():
     }
 
     headers = {
-        "User-Agent": "Mozilla/5.0"
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
     }
 
     try:
         res = requests.get(url, params=params, headers=headers)
-        data = res.json()
 
+        print("STATUS:", res.status_code)
+        print("TEXT:", res.text[:200])
+
+        if res.status_code != 200:
+            send(f"❌ HTTP {res.status_code}")
+            return
+
+        data = res.json()
         items = data.get("items", [])
 
-        print("ITEMS:", items)
-
         if not items:
-            send("⚠️ Aucun résultat trouvé")
+            send("⚠️ Aucun résultat")
             return
 
         for item in items:
             if item["id"] not in seen:
                 seen.add(item["id"])
 
-                title = item["title"]
-                price = item["price"]
-                link = item["url"]
-
-                send(f"🔥 {title}\n💰 {price}€\n👉 {link}")
+                send(f"🔥 {item['title']}\n💰 {item['price']}€\n👉 {item['url']}")
 
     except Exception as e:
         send(f"❌ Erreur: {e}")
