@@ -13,7 +13,41 @@ def send(msg):
     requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
 
 def check():
-    send("🚀 BOT ACTIF")
+    url = "https://www.vinted.fr/api/v2/catalog/items"
+    params = {
+        "search_text": SEARCH,
+        "order": "newest_first",
+        "per_page": 5
+    }
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    try:
+        res = requests.get(url, params=params, headers=headers)
+        data = res.json()
+
+        items = data.get("items", [])
+
+        print("ITEMS:", items)
+
+        if not items:
+            send("⚠️ Aucun résultat trouvé")
+            return
+
+        for item in items:
+            if item["id"] not in seen:
+                seen.add(item["id"])
+
+                title = item["title"]
+                price = item["price"]
+                link = item["url"]
+
+                send(f"🔥 {title}\n💰 {price}€\n👉 {link}")
+
+    except Exception as e:
+        send(f"❌ Erreur: {e}")
 
 while True:
     check()
