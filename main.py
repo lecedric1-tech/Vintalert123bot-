@@ -1,12 +1,7 @@
 import requests
-import time
 
-TOKEN = "8787625810:AAHLDdUbsEFf8hjwwTVeIQemGj0lj2juYoo"
-CHAT_ID = "8767334604"
-
-seen = set()
-
-search = "nike"
+TOKEN = "TON_TOKEN"
+CHAT_ID = "TON_CHAT_ID"
 
 def send(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -15,28 +10,30 @@ def send(msg):
 def check():
     url = "https://www.vinted.fr/vetements?search_text=nike&order=newest_first&rss=1"
 
-    try:
-        res = requests.get(url)
-        text = res.text
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "fr-FR,fr;q=0.9",
+    }
 
-        if "<item>" not in text:
-            send("⚠️ Aucun résultat RSS")
-            return
+    res = requests.get(url, headers=headers)
 
-        items = text.split("<item>")[1:6]
+    if res.status_code != 200:
+        send(f"❌ HTTP {res.status_code}")
+        return
 
-        for item in items:
-            title = item.split("<title>")[1].split("</title>")[0]
-            link = item.split("<link>")[1].split("</link>")[0]
+    text = res.text
 
-            if link not in seen:
-                seen.add(link)
+    if "<item>" not in text:
+        send("⚠️ Aucun résultat")
+        return
 
-                send(f"🔥 {title}\n👉 {link}")
+    items = text.split("<item>")[1:4]
 
-    except Exception as e:
-        send(f"❌ Erreur: {e}")
+    for item in items:
+        title = item.split("<title>")[1].split("</title>")[0]
+        link = item.split("<link>")[1].split("</link>")[0]
 
-while True:
-    check()
-    time.sleep(60)
+        send(f"🔥 {title}\n👉 {link}")
+
+check()
