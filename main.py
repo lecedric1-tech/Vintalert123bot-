@@ -6,47 +6,33 @@ CHAT_ID = "8767334604"
 
 seen = set()
 
-SEARCH = "nike"
+search_text=nike
 
 def send(msg):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
 
 def check():
-    url = "https://www.vinted.fr/api/v2/catalog/items"
-    params = {
-        "search_text": SEARCH,
-        "order": "newest_first",
-        "per_page": 5
-    }
-
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-    }
+    url = "https://www.vinted.fr/vetements?search_text=nike&order=newest_first&rss=1"
 
     try:
-        res = requests.get(url, params=params, headers=headers)
+        res = requests.get(url)
+        text = res.text
 
-        print("STATUS:", res.status_code)
-        print("TEXT:", res.text[:200])
-
-        if res.status_code != 200:
-            send(f"❌ HTTP {res.status_code}")
+        if "<item>" not in text:
+            send("⚠️ Aucun résultat RSS")
             return
 
-        data = res.json()
-        items = data.get("items", [])
-
-        if not items:
-            send("⚠️ Aucun résultat")
-            return
+        items = text.split("<item>")[1:6]
 
         for item in items:
-            if item["id"] not in seen:
-                seen.add(item["id"])
+            title = item.split("<title>")[1].split("</title>")[0]
+            link = item.split("<link>")[1].split("</link>")[0]
 
-                send(f"🔥 {item['title']}\n💰 {item['price']}€\n👉 {item['url']}")
+            if link not in seen:
+                seen.add(link)
+
+                send(f"🔥 {title}\n👉 {link}")
 
     except Exception as e:
         send(f"❌ Erreur: {e}")
